@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../sustainable_guides/screens/jurnal_page.dart';
 import 'beranda_page.dart';
+import 'akun_guest_view.dart';
 
 enum _Tab { beranda, katalog, jual, jurnal, akun }
 
@@ -63,19 +64,7 @@ class _MainShellState extends State<MainShell> {
               description: 'Form untuk memasang listing akan tersedia di sini.',
             ),
             const JurnalPage(),
-            _ModulePreview(
-              title: 'Profil dan Akun',
-              description:
-                  'Informasi profil dan pengaturan akun akan tampil di sini.',
-              action: OutlinedButton.icon(
-                onPressed: () => _openModule(
-                  'Laporan dan Moderasi',
-                  'Pelaporan listing dan status laporan akan tersedia di sini.',
-                ),
-                icon: const Icon(Icons.flag_outlined),
-                label: const Text('Laporan'),
-              ),
-            ),
+            AkunGuestView(onOpenJournal: () => _select(_Tab.jurnal)),
           ],
         ),
         bottomNavigationBar: ColoredBox(
@@ -125,11 +114,10 @@ class _MainShellState extends State<MainShell> {
 }
 
 class _ModulePreview extends StatelessWidget {
-  const _ModulePreview({this.title, required this.description, this.action});
+  const _ModulePreview({this.title, required this.description});
 
   final String? title;
   final String description;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +137,6 @@ class _ModulePreview extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
               Text(description, textAlign: TextAlign.center),
-              if (action != null) ...[const SizedBox(height: 16), action!],
             ],
           ),
         ),

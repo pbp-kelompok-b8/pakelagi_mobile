@@ -3,6 +3,50 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pakelagi_mobile/main.dart';
 
 void main() {
+  testWidgets('Guest account fits narrow screens and opens journal', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MyApp());
+    await tester.tap(find.text('Akun'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masuk'), findsOneWidget);
+    await tester.tap(find.text('Daftar akun baru'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Daftar akun baru — pratinjau tampilan saja.'),
+      findsOneWidget,
+    );
+    ScaffoldMessenger.of(tester.element(find.text('Masuk')))
+        .hideCurrentSnackBar();
+    await tester.pumpAndSettle();
+    final accountScroll = find.descendant(
+      of: find.byKey(const PageStorageKey('akun-guest')),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Tentang Pakelagi'),
+      200,
+      scrollable: accountScroll,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tentang Pakelagi'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Tentang Pakelagi — pratinjau tampilan saja.'),
+      findsOneWidget,
+    );
+    ScaffoldMessenger.of(tester.element(find.text('Tentang Pakelagi')))
+        .hideCurrentSnackBar();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jurnal slow fashion'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Cari panduan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('Beranda renders and local interactions work', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -63,14 +107,14 @@ void main() {
 
     await tester.tap(find.text('Akun'));
     await tester.pumpAndSettle();
-    expect(find.text('Profil dan Akun'), findsOneWidget);
-
-    await tester.tap(find.text('Laporan'));
+    expect(
+      find.text('Satu akun untuk menyimpan, menghubungi, dan menjual.'),
+      findsOneWidget,
+    );
+    expect(find.text('Daftar akun baru'), findsOneWidget);
+    await tester.tap(find.text('Masuk'));
     await tester.pumpAndSettle();
-    expect(find.text('Laporan dan Moderasi'), findsOneWidget);
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.text('Profil dan Akun'), findsOneWidget);
+    expect(find.text('Masuk — pratinjau tampilan saja.'), findsOneWidget);
 
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
