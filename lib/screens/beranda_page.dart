@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../sustainable_guides/screens/jurnal_page.dart';
+
 const _ink = Color(0xFF1D1A16);
 const _brand = Color(0xFFB04B25);
 const _muted = Color(0xFF645C52);
@@ -95,6 +97,19 @@ class _BerandaPageState extends State<BerandaPage> {
           duration: const Duration(seconds: 2),
         ),
       );
+  }
+
+  Future<void> _openJurnal() async {
+    await Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) => const JurnalPage(),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+    if (mounted) {
+      setState(() => _navigation = 0);
+    }
   }
 
   @override
@@ -828,6 +843,10 @@ class _BerandaPageState extends State<BerandaPage> {
                     child: _TapSurface(
                       radius: 12,
                       onTap: () {
+                        if (index == 3) {
+                          _openJurnal();
+                          return;
+                        }
                         setState(() => _navigation = index);
                         if (index != 0) _preview(label);
                       },
