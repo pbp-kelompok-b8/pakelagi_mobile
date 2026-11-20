@@ -1,30 +1,68 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:pakelagi_mobile/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Beranda renders and local interactions work', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Baru masuk'), findsOneWidget);
+    expect(find.text('Flutter Demo Home Page'), findsNothing);
+    expect(find.text('Beranda'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.tap(find.text('Top').first);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Simpan favorit').first);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Hapus favorit'), findsOneWidget);
+    await tester.tap(find.byTooltip('Hapus favorit').first);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Hapus favorit'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.byTooltip('Filter'),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byTooltip('Filter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pilih kategori'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ActionChip, 'Dress'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pilih kategori'), findsNothing);
+
+    await tester.tap(find.text('Akun'));
+    await tester.pumpAndSettle();
+    expect(find.text('Akun — pratinjau tampilan saja.'), findsOneWidget);
+  });
+
+  testWidgets('Beranda scrolls on narrow mobile screens without overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Lemarimu penuh cerita.'),
+      350,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Pasang iklan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
