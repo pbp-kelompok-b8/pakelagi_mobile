@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../sustainable_guides/screens/jurnal_page.dart';
-
 const _ink = Color(0xFF1D1A16);
 const _brand = Color(0xFFB04B25);
 const _muted = Color(0xFF645C52);
@@ -76,7 +74,18 @@ const _nearProducts = [
 
 /// UI-only preview: selections and favourites are kept locally, without an API.
 class BerandaPage extends StatefulWidget {
-  const BerandaPage({super.key});
+  const BerandaPage({
+    super.key,
+    required this.onOpenFavorites,
+    required this.onOpenCatalog,
+    required this.onOpenJournal,
+    required this.onOpenSell,
+  });
+
+  final VoidCallback onOpenFavorites;
+  final VoidCallback onOpenCatalog;
+  final VoidCallback onOpenJournal;
+  final VoidCallback onOpenSell;
 
   @override
   State<BerandaPage> createState() => _BerandaPageState();
@@ -84,7 +93,7 @@ class BerandaPage extends StatefulWidget {
 
 class _BerandaPageState extends State<BerandaPage> {
   String _category = 'Semua';
-  int _navigation = 0;
+
   final Set<String> _favourites = {};
 
   void _preview(String title) {
@@ -99,69 +108,54 @@ class _BerandaPageState extends State<BerandaPage> {
       );
   }
 
-  Future<void> _openJurnal() async {
-    await Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        pageBuilder: (_, _, _) => const JurnalPage(),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
-    if (mounted) {
-      setState(() => _navigation = 0);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: _header()),
-                SliverToBoxAdapter(child: _hero()),
-                SliverToBoxAdapter(child: _categoryChips()),
-                SliverToBoxAdapter(child: _banner()),
-                SliverToBoxAdapter(
-                  child: _sectionHeading(
-                    'Baru masuk',
-                    subtitle: 'Diunggah minggu ini di sekitarmu',
-                  ),
+    return SafeArea(
+      bottom: false,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: _header()),
+              SliverToBoxAdapter(child: _hero()),
+              SliverToBoxAdapter(child: _categoryChips()),
+              SliverToBoxAdapter(child: _banner()),
+              SliverToBoxAdapter(
+                child: _sectionHeading(
+                  'Baru masuk',
+                  subtitle: 'Diunggah minggu ini di sekitarmu',
+                  onViewAll: widget.onOpenCatalog,
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  sliver: SliverLayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = (constraints.crossAxisExtent - 16) / 2;
-                      return SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 24,
-                          mainAxisExtent: width * 1.25 + 164,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) => _productCard(_newProducts[index]),
-                          childCount: _newProducts.length,
-                        ),
-                      );
-                    },
-                  ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                sliver: SliverLayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = (constraints.crossAxisExtent - 16) / 2;
+                    return SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 24,
+                        mainAxisExtent: width * 1.25 + 164,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _productCard(_newProducts[index]),
+                        childCount: _newProducts.length,
+                      ),
+                    );
+                  },
                 ),
-                SliverToBoxAdapter(child: _exploreCategories()),
-                SliverToBoxAdapter(child: _nearby()),
-                SliverToBoxAdapter(child: _journal()),
-                SliverToBoxAdapter(child: _sellBanner()),
-              ],
-            ),
+              ),
+              SliverToBoxAdapter(child: _exploreCategories()),
+              SliverToBoxAdapter(child: _nearby()),
+              SliverToBoxAdapter(child: _journal()),
+              SliverToBoxAdapter(child: _sellBanner()),
+            ],
           ),
         ),
       ),
-      bottomNavigationBar: _bottomNavigation(),
     );
   }
 
@@ -191,7 +185,7 @@ class _BerandaPageState extends State<BerandaPage> {
         ),
         IconButton(
           tooltip: 'Favorit',
-          onPressed: () => _preview('Favorit (${_favourites.length})'),
+          onPressed: widget.onOpenFavorites,
           icon: const Icon(Icons.favorite_border_rounded, size: 22),
         ),
         IconButton(
@@ -399,7 +393,11 @@ class _BerandaPageState extends State<BerandaPage> {
     ),
   );
 
-  Widget _sectionHeading(String title, {String? subtitle}) => Padding(
+  Widget _sectionHeading(
+    String title, {
+    String? subtitle,
+    required VoidCallback onViewAll,
+  }) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -432,7 +430,7 @@ class _BerandaPageState extends State<BerandaPage> {
         ),
         const SizedBox(width: 8),
         _TapSurface(
-          onTap: () => _preview(title),
+          onTap: onViewAll,
           radius: 8,
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 5),
@@ -598,7 +596,7 @@ class _BerandaPageState extends State<BerandaPage> {
       padding: const EdgeInsets.only(top: 28),
       child: Column(
         children: [
-          _sectionHeading('Jelajahi kategori'),
+          _sectionHeading('Jelajahi kategori', onViewAll: widget.onOpenCatalog),
           const SizedBox(height: 16),
           SizedBox(
             height: 128,
@@ -677,6 +675,7 @@ class _BerandaPageState extends State<BerandaPage> {
         _sectionHeading(
           'Dekat kamu · Bandung',
           subtitle: 'Serah terima lebih mudah',
+          onViewAll: widget.onOpenCatalog,
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -701,6 +700,7 @@ class _BerandaPageState extends State<BerandaPage> {
         _sectionHeading(
           'Dari jurnal',
           subtitle: 'Merawat, memperbaiki, memakai ulang',
+          onViewAll: widget.onOpenJournal,
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -802,7 +802,7 @@ class _BerandaPageState extends State<BerandaPage> {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            onPressed: () => _preview('Pasang iklan'),
+            onPressed: widget.onOpenSell,
             icon: const Icon(Icons.add_rounded, size: 18),
             label: const Text(
               'Pasang iklan',
@@ -813,88 +813,6 @@ class _BerandaPageState extends State<BerandaPage> {
       ),
     ),
   );
-
-  Widget _bottomNavigation() {
-    const items = [
-      ('Beranda', Icons.home_outlined, Icons.home_rounded),
-      ('Katalog', Icons.grid_view_outlined, Icons.grid_view_rounded),
-      ('Jual', Icons.add_rounded, Icons.add_rounded),
-      ('Jurnal', Icons.menu_book_outlined, Icons.menu_book_rounded),
-      ('Akun', Icons.person_outline_rounded, Icons.person_rounded),
-    ];
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _border)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Center(
-          heightFactor: 1,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: SizedBox(
-              height: 72,
-              child: Row(
-                children: List.generate(items.length, (index) {
-                  final (label, icon, activeIcon) = items[index];
-                  final selected = _navigation == index;
-                  return Expanded(
-                    child: _TapSurface(
-                      radius: 12,
-                      onTap: () {
-                        if (index == 3) {
-                          _openJurnal();
-                          return;
-                        }
-                        setState(() => _navigation = index);
-                        if (index != 0) _preview(label);
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (index == 2)
-                            Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: const BoxDecoration(
-                                color: _brand,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            )
-                          else
-                            Icon(
-                              selected ? activeIcon : icon,
-                              color: selected ? _brand : _muted,
-                              size: 23,
-                            ),
-                          const SizedBox(height: 4),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: selected ? _brand : _muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   void _showFilters() {
     showModalBottomSheet<void>(

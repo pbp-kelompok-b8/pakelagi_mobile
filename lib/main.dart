@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/beranda_page.dart';
+import 'screens/main_shell.dart';
 
 void main() => runApp(const MyApp());
 
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Color(0xFF1D1A16)),
         ),
       ),
-      home: const BerandaPage(),
+      home: const MainShell(),
     );
   }
 }
