@@ -81,10 +81,7 @@ const _latestGuides = [
 ];
 
 class JurnalPage extends StatefulWidget {
-  const JurnalPage({super.key, this.showBottomNav = true});
-
-  /// Set ke `false` nanti kalau tim sudah memakai wrapper MainShell bersama.
-  final bool showBottomNav;
+  const JurnalPage({super.key});
 
   @override
   State<JurnalPage> createState() => _JurnalPageState();
@@ -133,28 +130,25 @@ class _JurnalPageState extends State<JurnalPage> {
     final featured = _filter(_featuredGuides);
     final latest = _filter(_latestGuides);
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: _header()),
-                if (_isSearching) SliverToBoxAdapter(child: _searchBar()),
-                SliverToBoxAdapter(child: _subtitle()),
-                SliverToBoxAdapter(child: _categoryChips()),
-                if (featured.isNotEmpty)
-                  SliverToBoxAdapter(child: _featuredSection(featured)),
-                SliverToBoxAdapter(child: _latestSection(latest)),
-                SliverToBoxAdapter(child: _contributeBanner()),
-              ],
-            ),
+    return SafeArea(
+      bottom: false,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: _header()),
+              if (_isSearching) SliverToBoxAdapter(child: _searchBar()),
+              SliverToBoxAdapter(child: _subtitle()),
+              SliverToBoxAdapter(child: _categoryChips()),
+              if (featured.isNotEmpty)
+                SliverToBoxAdapter(child: _featuredSection(featured)),
+              SliverToBoxAdapter(child: _latestSection(latest)),
+              SliverToBoxAdapter(child: _contributeBanner()),
+            ],
           ),
         ),
       ),
-      bottomNavigationBar: widget.showBottomNav ? _bottomNavigation() : null,
     );
   }
 
@@ -538,90 +532,6 @@ class _JurnalPageState extends State<JurnalPage> {
       child: const Icon(Icons.image_outlined, color: _tertiary),
     ),
   );
-
-  Widget _bottomNavigation() {
-    const items = [
-      ('Beranda', Icons.home_outlined, Icons.home_rounded),
-      ('Katalog', Icons.grid_view_outlined, Icons.grid_view_rounded),
-      ('Jual', Icons.add_rounded, Icons.add_rounded),
-      ('Jurnal', Icons.menu_book_outlined, Icons.menu_book_rounded),
-      ('Akun', Icons.person_outline_rounded, Icons.person_rounded),
-    ];
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _border)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Center(
-          heightFactor: 1,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: SizedBox(
-              height: 72,
-              child: Row(
-                children: List.generate(items.length, (index) {
-                  final (label, icon, activeIcon) = items[index];
-                  final selected = index == 3; // Tab Jurnal aktif
-                  return Expanded(
-                    child: _TapSurface(
-                      radius: 12,
-                      onTap: () {
-                        if (index == 0) {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          }
-                        } else if (index != 3) {
-                          _preview(label);
-                        }
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (index == 2)
-                            Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: const BoxDecoration(
-                                color: _brand,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            )
-                          else
-                            Icon(
-                              selected ? activeIcon : icon,
-                              color: selected ? _brand : _muted,
-                              size: 23,
-                            ),
-                          const SizedBox(height: 4),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: selected ? _brand : _muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _TapSurface extends StatelessWidget {

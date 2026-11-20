@@ -2,7 +2,7 @@
 
 Aplikasi mobile Flutter untuk Pakelagi, platform yang membantu masyarakat Indonesia menemukan dan memasang listing pakaian *preloved*. Aplikasi web Pakelagi menjadi layanan backend dan pengelolaan data bersama.
 
-> **Status saat ini:** repository Flutter berisi prototipe UI beranda dengan data contoh lokal. Aplikasi mobile ini belum melakukan request ke PWS/DRF. Endpoint DRF yang telah didokumentasikan pada backend web saat ini mencakup akun dan profil; endpoint REST untuk listing, favorit, panduan, dan laporan belum tercantum dalam spesifikasi web. Status implementasi perlu dibedakan dari rancangan integrasi di bawah.
+> **Status Checkpoint 1:** semua modul sudah bisa dibuka dari aplikasi. Beranda dan Jurnal memakai data contoh lokal; halaman modul lain masih kerangka navigasi. API DRF sudah tersedia di PWS, tetapi Flutter belum terhubung ke API.
 
 ---
 
@@ -37,37 +37,37 @@ Fitur seperti pembayaran, checkout, keranjang, pemesanan, chat internal, dan pen
 
 ## Modul dan Pembagian Kerja
 
-Pembagian berikut adalah modul proyek web Pakelagi dan penanggung jawab kelompok. Modul-modul ini merupakan ruang lingkup produk lintas web/mobile, **bukan pernyataan bahwa semuanya sudah tersedia di aplikasi Flutter**. Kondisi implementasi backend di bawah dirangkum dari [spesifikasi web](docs/pakelagi-web/pakelagi-spesification.md).
+Pembagian berikut adalah ruang lingkup web/mobile dan penanggung jawab setiap modul. Petunjuk navigasi menunjukkan cara membuka kerangka modul, bukan fitur yang sudah selesai.
 
 ### 1. Clothing Listings — Nugraha Kautsarrizqi Caksana (`2506541250`)
 
 Listing pakaian dengan katalog, pencarian judul/brand, filter kategori/ukuran/kondisi/harga/kota/tag keberlanjutan, detail, pagination, dan pengelolaan listing oleh pemilik. Status listing meliputi `Available`, `Sold`, dan `Hidden`. Form web juga menggunakan pencarian lokasi Nominatim.
 
-**Status web:** fitur listing tersedia melalui halaman web dan Django Admin. **Status Flutter:** kartu serta filter pada beranda masih menggunakan data statis lokal; belum mengambil listing dari API.
+**Navigasi Flutter:** tab **Katalog** dan **Jual**. Kartu dan filter Beranda masih memakai data contoh lokal.
 
 ### 2. User Profiles — Victoriano Iman Santosa (`2506544353`)
 
 Profil member terhubung satu-ke-satu dengan akun Django. Cakupannya onboarding, display name, bio, kota umum, kontak, dan etalase listing publik. Kontak penjual dibatasi untuk pengguna yang memenuhi aturan akses.
 
-**Status web:** onboarding, edit profil, profil publik, serta endpoint JSON akun/profil tersedia. Penghapusan profil saja belum tersedia di web; penghapusan akun merupakan alur terpisah. **Status Flutter:** belum ada alur profil atau autentikasi yang terhubung ke backend.
+**Navigasi Flutter:** tab **Akun**. Login dan pengelolaan profil belum terhubung ke backend.
 
 ### 3. Saved Favorites — David Liman (`2506601956`)
 
 Member dapat menyimpan listing yang memenuhi syarat, melihat daftar privat, mengubah catatan, dan menghapus favorit. Kombinasi member dan listing harus unik.
 
-**Status web:** tambah/hapus favorit, daftar, dan catatan tersedia di web. **Status Flutter:** ikon favorit hanya mengubah state lokal sementara dan hilang ketika aplikasi dimulai ulang; belum tersinkron dengan akun atau server.
+**Navigasi Flutter:** ikon hati **Favorit** di header Beranda. Tombol simpan pada kartu Beranda hanya mengubah state lokal sementara; belum mengisi halaman Favorit atau tersinkron ke server.
 
 ### 4. Sustainable Guides — Muhammad Raihan Al Qadri Kusumaputra (`2506602334`)
 
 Panduan mengenai perawatan, perbaikan, penggunaan ulang, dan *slow fashion*. Member dapat mengirim draf; moderator meninjau dan mengatur publikasinya.
 
-**Status web:** pembacaan guide terbit, pengiriman/pengelolaan draf `PENDING`, serta moderasi/publikasi tersedia. Pembuatan dan edit konten guide oleh admin melalui dashboard belum tersedia. **Status Flutter:** terdapat kartu jurnal contoh pada beranda, belum mengambil artikel dari backend.
+**Navigasi Flutter:** tab **Jurnal** membuka halaman panduan yang sudah ada, dengan data contoh lokal.
 
 ### 5. Reports & Moderation — Clevraldo Limuel (`2506656583`)
 
 Rancangan modul untuk pelaporan listing dan peninjauan laporan oleh moderator.
 
-**Status web:** model, endpoint, dan UI report/moderasi report belum diimplementasikan menurut spesifikasi web. **Status Flutter:** belum tersedia.
+**Navigasi Flutter:** **Akun → Laporan**. Halaman belum bisa mengirim atau meninjau laporan.
 
 ---
 
@@ -77,7 +77,7 @@ Rancangan modul untuk pelaporan listing dan peninjauan laporan oleh moderator.
 |---|---|
 | **Guest** | Menjelajahi listing `Available`, melihat detail/profil publik, dan membaca guide yang sudah terbit. Tidak dapat melihat kontak penjual. |
 | **Member** | Menggunakan fitur guest, mengelola listing miliknya, profil, dan favorit; dapat menghubungi penjual sesuai aturan akses. Dapat mengirim/mengelola draf guide sesuai status. |
-| **Admin/staff** | Menjaga kualitas konten. Listing dimoderasi melalui Django Admin; moderasi guide memiliki dashboard tersendiri dan memerlukan superuser. Moderasi report belum tersedia. |
+| **Admin/staff** | Menjaga kualitas konten. Listing dimoderasi melalui Django Admin; peninjauan panduan dan laporan mengikuti izin backend. |
 
 Satu akun member dapat menjadi penjual sekaligus pencari pakaian. Pada prototipe Flutter saat ini, login dan pembagian hak akses tersebut belum diimplementasikan.
 
@@ -94,27 +94,25 @@ Target arsitektur integrasi adalah aplikasi Flutter menggunakan HTTP/JSON untuk 
 3. Backend membaca atau mengubah database Pakelagi, lalu mengembalikan response JSON dengan status HTTP.
 4. Aplikasi Flutter mengubah response menjadi model/data UI. Perubahan melalui web dan mobile akan menggunakan backend/database yang sama sehingga data dapat dibagikan.
 
-**Kondisi repository:** alur tersebut belum terhubung dari aplikasi Flutter. Belum ada API client, base URL konfigurasi, atau dependency HTTP di project. Beranda saat ini adalah prototipe UI dengan data contoh. Karena itu, tautan PWS di bawah merupakan deployment web dan belum membuktikan bahwa semua fitur dapat dikonsumsi melalui API oleh mobile.
+**Kondisi saat ini:** Flutter belum mengirim request ke backend. API bisa dicoba langsung di PWS; endpoint privat memerlukan sesi login yang sesuai.
 
-### Endpoint DRF yang didokumentasikan pada backend
+### Endpoint DRF di PWS
 
-Base URL PWS: `http://david-liman-pakelagi.pws.cs.ui.ac.id`
+Semua path pada tabel relatif terhadap `/api/v1/` (misalnya `GET /api/v1/categories/`).
 
-| Area | Endpoint yang tersedia menurut spesifikasi web |
+| Area | Metode dan path |
 |---|---|
-| Registrasi akun | `POST /api/v1/accounts/register/` |
-| Login | `/api/v1/accounts/login/` |
-| Logout | `/api/v1/accounts/logout/` |
-| Hapus akun | `POST /api/v1/accounts/delete/` |
-| Daftar/buat profil | `/api/v1/profiles/` |
-| Profil pengguna saat ini | `/api/v1/profiles/me/` |
-| Profil berdasarkan ID pengguna | `/api/v1/profiles/<user_id>/` |
+| Akun | `POST accounts/register/`; `POST accounts/login/`; `POST accounts/logout/`; `POST accounts/delete/` |
+| Profil | `POST profiles/`; `GET`, `PATCH profiles/me/`; `GET profiles/<user_id>/` |
+| Kategori | `GET categories/` |
+| Listing | `GET`, `POST listings/`; `GET`, `PATCH`, `DELETE listings/<id>/`; `POST listings/<id>/status/`; `GET listings/mine/`; `GET listings/locations/` |
+| Favorit | `GET`, `POST favorites/`; `GET`, `PATCH`, `DELETE favorites/<id>/` |
+| Panduan | `GET`, `POST guides/`; `GET guides/my-submissions/`; `GET`, `PUT`, `PATCH`, `DELETE guides/<id>/` |
+| Laporan | `GET`, `POST reports/`; `GET`, `PUT`, `PATCH`, `DELETE reports/<uuid>/` |
 
-Dokumentasi web menyebut API tersebut menggunakan **Django session authentication**, bukan bearer token. Implementasi klien mobile perlu menangani sesi/cookie dan perlindungan CSRF untuk request yang mengubah data sesuai kontrak API backend.
+Untuk mencoba endpoint publik: `curl -H 'Accept: application/json' https://david-liman-pakelagi.pws.cs.ui.ac.id/api/v1/categories/`. Jika menjalankan Django lokal, ganti host dengan `http://127.0.0.1:8000`.
 
-**Batasan API yang diketahui:** spesifikasi web menyatakan API listing belum termasuk. Endpoint DRF untuk listing, favorite, guide, dan report tidak didokumentasikan sebagai tersedia. Sebelum mengintegrasikan modul-modul tersebut, kontrak endpoint/JSON, izin, serta metode autentikasi perlu disepakati dan disediakan pada backend. Jangan menganggap halaman web Django atau interaksi HTMX sebagai endpoint REST.
-
-Spesifikasi web juga mencatat detail implementasi, status fitur, dan keterbatasan lainnya di [`docs/pakelagi-web/pakelagi-spesification.md`](docs/pakelagi-web/pakelagi-spesification.md).
+Endpoint privat menggunakan **Django session authentication**. Klien perlu menyimpan cookie sesi serta mengirim token CSRF untuk request yang mengubah data. Lihat [README backend](https://github.com/pbp-kelompok-b8/pakelagi/blob/main/README.md#9-api-pakelagi-django-rest-framework) untuk setup, payload, dan alur login/CSRF.
 
 ---
 
@@ -122,7 +120,7 @@ Spesifikasi web juga mencatat detail implementasi, status fitur, dan keterbatasa
 
 - **Repository web:** [pbp-kelompok-b8/pakelagi](https://github.com/pbp-kelompok-b8/pakelagi)
 - **Repository mobile:** [pbp-kelompok-b8/pakelagi_mobile](https://github.com/pbp-kelompok-b8/pakelagi_mobile)
-- **Deployment PWS web:** [david-liman-pakelagi.pws.cs.ui.ac.id](http://david-liman-pakelagi.pws.cs.ui.ac.id)
+- **Deployment PWS web:** [david-liman-pakelagi.pws.cs.ui.ac.id](https://david-liman-pakelagi.pws.cs.ui.ac.id)
 - **Figma web:** [Web Design](https://www.figma.com/design/dCekkdFnlpwdcTY6vaXyrX/Web-Design?m=auto&t=WEkEhoembXHyU27W-1)
 - **Figma mobile:** [Mobile Design](https://www.figma.com/design/QZEtPQaa7BCS3UM4BhxhkX/Mobile-Design?node-id=20-4&m=dev)
 - **APK:** Belum tersedia. Tautan dapat ditambahkan setelah APK release dipublikasikan.
@@ -139,13 +137,13 @@ Spesifikasi web juga mencatat detail implementasi, status fitur, dan keterbatasa
 ### Menjalankan secara lokal
 
 ```bash
-git clone https://github.com/pbp-kelompok-b8/pakelagi_mobile.git
+git clone --branch dev https://github.com/pbp-kelompok-b8/pakelagi_mobile.git
 cd pakelagi_mobile
 flutter pub get
 flutter run
 ```
 
-Aplikasi yang berjalan saat ini menampilkan prototipe beranda dan tidak memerlukan koneksi ke backend.
+Aplikasi bisa dijalankan tanpa backend. Gunakan bottom navigation untuk berpindah antara Beranda, Katalog, Jual, Jurnal, dan Akun. Buka Favorit lewat ikon hati di Beranda dan Laporan lewat Akun.
 
 ### Membuat APK Android (opsional)
 
@@ -160,12 +158,10 @@ APK hasil build secara default berada di `build/app/outputs/flutter-apk/app-rele
 ## Informasi Implementasi Mobile Saat Ini
 
 - Entry point aplikasi: `lib/main.dart`.
-- Halaman utama prototipe: `lib/screens/beranda_page.dart`.
-- Data produk dan panduan yang terlihat pada halaman utama merupakan contoh lokal.
-- Pencarian, navigasi, dan sebagian tombol masih menampilkan notifikasi pratinjau.
-- Favorit hanya disimpan dalam state halaman selama aplikasi aktif, bukan ke server atau penyimpanan permanen.
+- Navigasi utama dan kerangka halaman: `lib/screens/main_shell.dart`.
+- Beranda (`lib/screens/beranda_page.dart`) dan Jurnal (`lib/sustainable_guides/screens/jurnal_page.dart`) menampilkan data contoh lokal. Sebagian aksi di dalam halaman masih berupa pratinjau.
 - Asset gambar dan font aplikasi berada di direktori `assets/`.
 
 ---
 
-_Spesifikasi produk dan implementasi web: [`docs/pakelagi-web/pakelagi-spesification.md`](docs/pakelagi-web/pakelagi-spesification.md)._ 
+_Arsip spesifikasi web (bukan acuan status API terkini): [`docs/pakelagi-web/pakelagi-spesification.md`](docs/pakelagi-web/pakelagi-spesification.md)._

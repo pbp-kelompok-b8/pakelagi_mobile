@@ -39,10 +39,63 @@ void main() {
     await tester.tap(find.widgetWithText(ActionChip, 'Dress'));
     await tester.pumpAndSettle();
     expect(find.text('Pilih kategori'), findsNothing);
+  });
+
+  testWidgets('Navigasi membuka setiap modul dan bisa kembali', (tester) async {
+    tester.view.physicalSize = const Size(320, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Katalog'));
+    await tester.pumpAndSettle();
+    expect(find.text('Katalog Pakaian'), findsOneWidget);
+
+    await tester.tap(find.text('Jual'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pasang Listing'), findsOneWidget);
+
+    await tester.tap(find.text('Jurnal'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Cari panduan'), findsOneWidget);
 
     await tester.tap(find.text('Akun'));
     await tester.pumpAndSettle();
-    expect(find.text('Akun — pratinjau tampilan saja.'), findsOneWidget);
+    expect(find.text('Profil dan Akun'), findsOneWidget);
+
+    await tester.tap(find.text('Laporan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Laporan dan Moderasi'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Profil dan Akun'), findsOneWidget);
+
+    await tester.tap(find.text('Beranda'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Favorit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Favorit Tersimpan'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Favorit'), findsOneWidget);
+    expect(find.text('Favorit Tersimpan'), findsNothing);
+
+    final lihatKatalog = find.descendant(
+      of: find.widgetWithText(Row, 'Baru masuk'),
+      matching: find.text('Lihat semua'),
+    );
+    await tester.scrollUntilVisible(
+      lihatKatalog,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(lihatKatalog);
+    await tester.pumpAndSettle();
+    expect(find.text('Katalog Pakaian'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Beranda scrolls on narrow mobile screens without overflow', (
@@ -62,7 +115,14 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Pasang iklan'), findsOneWidget);
+    await tester.ensureVisible(find.text('Pasang iklan'));
+    await tester.tap(find.text('Pasang iklan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pasang Listing'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Pasang Listing'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
